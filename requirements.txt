@@ -1,0 +1,10 @@
+pandas
+numpy
+streamlit
+finance-datareader
+plotly
+seaborn
+matplotlib
+koreanize-matplotlib
+scikit-learn==0.24.2
+surprise
