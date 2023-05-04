@@ -37,7 +37,7 @@ st.write("""
 - 사용자 기반 협업 필터링 및 아이템 기반 협업 필터링 모델을 구현하고, 이들 모델의 평점 예측 성능을 평가한다. RMSE 값으로 성능을 비교하여 어떤 협업 필터링 방법이 더 나은 성능을 보이는지 결정한다.
 """)
 
-train = pd.read_csv("TRAIN.csv")
+train = pd.read_csv("data/TRAIN.csv")
 
 from sklearn.model_selection import train_test_split
 
