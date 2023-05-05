@@ -299,13 +299,4 @@ if book_id in book_to_idx:
 
       
 
-st.write("""
-    <script>
-        window.scrollTo(0, document.getElementById('part-5-book').offsetTop);
-    </script>
-""")
-st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
-
-js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
-st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
 
