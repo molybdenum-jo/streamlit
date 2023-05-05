@@ -246,11 +246,15 @@ train = pd.read_csv('data/TRAIN.csv')
 # 평점이 4점 이상인 데이터만 사용
 train = train[train['Book-Rating'] >= 4]
 
+# Book-ID 열의 문자열 값을 숫자로 바꾸기
+train['Book-ID'] = train['Book-ID'].str.replace('TRAIN_', '').astype(int)
+
 # Book-ID에 고유한 정수 인덱스 부여
 unique_books = list(set(train['Book-ID']))
 book_to_idx = {book: i for i, book in enumerate(unique_books)}
 idx_to_book = {i: book for book, i in book_to_idx.items()}
 train['Book-ID'] = train['Book-ID'].map(book_to_idx)
+
 
 # 사용자-아이템 행렬 생성
 num_users = len(train['User-ID'].unique())
