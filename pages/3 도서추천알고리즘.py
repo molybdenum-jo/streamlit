@@ -293,7 +293,7 @@ st.title('Book Recommender')
 book_id = st.text_input('Enter a book ID', key='input')
 if book_id in book_to_idx:
     recommended_books = recommend_books(book_id)
-    if len(re
+    if len(recommended_books) > 0:
 
        
 
