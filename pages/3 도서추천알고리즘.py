@@ -77,16 +77,18 @@ user_based_cf = KNNBasic(sim_options=sim_options)
 user_based_cf.fit(trainset)
 
 # 사용자가 선택한 책과 유사한 책 5개 추천
-def recommend_books(book_title):
-    book_rating = pivot_data[book_title]
-    similar_books_index = cos_sim[np.argsort(book_rating)][-6:-1]
+def recommend_books(Book-Title):
+    Book-Rating = pivot_data[Book-Title]
+    similar_books_index = cos_sim[np.argsort(Book-Rating)][-6:-1]
+    similar_books_index = np.floor(similar_books_index).astype(int)  # 실수 제거
     similar_books = list(pivot_data.index[similar_books_index])
     recommended_books = []
     for book in similar_books:
-        _, _, _, est, _ = user_based_cf.predict(uid=book, iid=book_title)
+        _, _, _, est, _ = user_based_cf.predict(uid=book, iid=Book-Title)
         if est >= 4.0:
             recommended_books.append(book)
     return recommended_books
+
 
 
 # Streamlit 앱 구성
