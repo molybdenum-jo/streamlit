@@ -33,7 +33,10 @@ js = "window.scrollTo(0, document.getElementById('part-1-book').offsetTop);"
     
 st.markdown("<h3 id='part-1-book'>✅Part 1. 협업 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
-
+st.write("""
+✔ 사용자기반 협업필터링
+""")
+st.write(""")
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
 
@@ -67,9 +70,6 @@ def recommend_books(book_title):
     return recommended_books
 
 
-
-
-
 # Streamlit 앱 구성
 st.title('Book Recommender')
 book_title = st.text_input('Enter a book title')
@@ -84,7 +84,56 @@ if book_title in pivot_data.columns:
 else:
     st.write('Enter a valid book title')
     
-    
+st.write("""
+✔ 아이템기반 협업필터링
+""")
+
+# 데이터 불러오기
+train = pd.read_csv('data/TRAIN.csv')
+
+# 평점이 4점 이상인 데이터만 사용
+train = train[train['Book-Rating'] >= 4]
+
+# 사용자-아이템 행렬 생성
+pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
+
+# 코사인 유사도 계산
+cos_sim = cosine_similarity(pivot_data.T)
+
+# 아이템 기반 협업 필터링 (KNNBasic) 모델 구축
+reader = Reader(rating_scale=(1, 10))
+data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
+trainset = data.build_full_trainset()
+sim_options = {'name': 'cosine', 'user_based': False}
+item_based_cf = KNNBasic(sim_options=sim_options)
+item_based_cf.fit(trainset)
+
+# 사용자가 선택한 책과 유사한 책 5개 추천
+def recommend_books(book_title):
+    book_rating = pivot_data[book_title]
+    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
+    similar_books = list(pivot_data.columns[similar_books_index])
+    recommended_books = []
+    for book in similar_books:
+        _, _, _, est, _ = item_based_cf.predict(uid=book_title, iid=book)
+        if est >= 4.0:
+            recommended_books.append(book)
+    return recommended_books
+
+# Streamlit 앱 구성
+st.title('Book Recommender')
+book_title = st.text_input('Enter a book title')
+if book_title in pivot_data.columns:
+    recommended_books = recommend_books(book_title)
+    if len(recommended_books) > 0:
+        st.write('Recommended books:')
+        for book in recommended_books:
+            st.write('- ' + book)
+    else:
+        st.write('No recommended books')
+else:
+    st.write('Enter a valid book title')
+
 js = "window.scrollTo(0, document.getElementById('part-2-book').offsetTop);"
 
     
