@@ -292,7 +292,14 @@ def recommend_books(book_id):
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
-book_id = st.text_input('Enter a book ID', key='input')
-if book_id in book_to_idx:
-    recommended_books = recommend_books(book_id)
+book_title = st.text_input('Enter a book title', key='input')
+if book_title in pivot_data.columns:
+    recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
+        st.write('Recommended books:')
+        for book in recommended_books:
+            st.write('- ' + book)
+    else:
+        st.write('No recommended books')
+else:
+    st.write('Enter a valid book title')
