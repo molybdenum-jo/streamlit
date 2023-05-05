@@ -36,7 +36,7 @@ st.markdown("<h3 id='part-1-book'>✅Part 1. 협업 필터링 기반의 추천 �
 st.write("""
 ✔ 사용자기반 협업필터링
 """)
-st.write(""")
+
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
 
