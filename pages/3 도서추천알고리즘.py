@@ -63,14 +63,14 @@ train = pd.read_csv('data/TRAIN.csv')
 train = train[train['Book-Rating'] >= 4]
 
 # 사용자-아이템 행렬 생성
-pivot_data = train.pivot_table(index='User_ID', columns='Book-Title', values='Book-Rating', fill_value=0)
+pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
 # 코사인 유사도 계산
 cos_sim = cosine_similarity(pivot_data)
 
 # 사용자 기반 협업 필터링 (KNNBasic) 모델 구축
 reader = Reader(rating_scale=(1, 10))
-data = Dataset.load_from_df(train[['User_ID', 'Book-Title', 'Book-Rating']], reader)
+data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
 trainset = data.build_full_trainset()
 sim_options = {'name': 'cosine', 'user_based': True}
 user_based_cf = KNNBasic(sim_options=sim_options)
