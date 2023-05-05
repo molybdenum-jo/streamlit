@@ -233,71 +233,74 @@ else:
 js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
 st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
-import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-import tensorflow as tf
+from sklearn.metrics.pairwise import cosine_similarity
+from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Concatenate
+from tensorflow.keras.models import Model
+import streamlit as st
 
-# 데이터 전처리
-@st.cache(allow_output_mutation=True)
-def load_data():
-    df = pd.read_csv("data/TRAIN.csv")
-    # 필요한 컬럼만 추출
-    df = df[["User-ID", "Book-Rating", "Book-ID"]]
-    # User-ID, Book-ID를 각각 0부터 순차적으로 인덱싱
-    df["User-ID"] = df["User-ID"].astype("category").cat.codes
-    df["Book-ID"] = df["Book-ID"].astype("category").cat.codes
-    return df
+# 데이터 불러오기
+train = pd.read_csv('data/TRAIN.csv')
 
-df = load_data()
+# 평점이 4점 이상인 데이터만 사용
+train = train[train['Book-Rating'] >= 4]
 
-# train, test set 분리
-train, test = train_test_split(df, test_size=0.2, random_state=42)
+# Book-ID에 고유한 정수 인덱스 부여
+unique_books = list(set(train['Book-ID']))
+book_to_idx = {book: i for i, book in enumerate(unique_books)}
+idx_to_book = {i: book for book, i in book_to_idx.items()}
+train['Book-ID'] = train['Book-ID'].map(book_to_idx)
 
-# 모델 구현
-class RecommenderModel(tf.keras.Model):
-    def __init__(self, n_users, n_items, latent_dim):
-        super(RecommenderModel, self).__init__()
-        self.user_embedding = tf.keras.layers.Embedding(n_users, latent_dim)
-        self.item_embedding = tf.keras.layers.Embedding(n_items, latent_dim)
-        self.dense1 = tf.keras.layers.Dense(128, activation='relu')
-        self.dense2 = tf.keras.layers.Dense(64, activation='relu')
-        self.dense3 = tf.keras.layers.Dense(1)
+# 사용자-아이템 행렬 생성
+num_users = len(train['User-ID'].unique())
+num_books = len(train['Book-ID'].unique())
+ratings_matrix = np.zeros((num_users, num_books))
+for row in train.itertuples():
+    ratings_matrix[row[1]-1, row[3]] = row[2]
 
-    def call(self, inputs):
-        user_vector = self.user_embedding(inputs[:, 0])
-        item_vector = self.item_embedding(inputs[:, 1])
-        x = tf.concat([user_vector, item_vector], axis=-1)
-        x = self.dense1(x)
-        x = self.dense2(x)
-        x = self.dense3(x)
-        return x
+# 딥러닝 모델 구축
+user_input = Input(shape=(1,))
+item_input = Input(shape=(1,))
 
-# 모델 학습
-def train_model(train, n_users, n_items, latent_dim):
-    model = RecommenderModel(n_users, n_items, latent_dim)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), loss='mse')
-    model.fit(train[['User-ID', 'Book-ID']].values, train['Book-Rating'].values, epochs=5, verbose=1)
-    return model
+user_embedding = Embedding(num_users, 20)(user_input)
+user_vec = Flatten()(user_embedding)
 
-n_users = len(df['User-ID'].unique())
-n_items = len(df['Book-ID'].unique())
-latent_dim = 32
-model = train_model(train, n_users, n_items, latent_dim)
+item_embedding = Embedding(num_books, 20)(item_input)
+item_vec = Flatten()(item_embedding)
 
-# 예측 및 추천
-def predict(user_id, model, df, n=10):
-    user = np.repeat(user_id, len(df['Book-ID'].unique()))
-    items = df['Book-ID'].unique()
-    predictions = model.predict([user, items])
-    recommended_book_ids = (-predictions.squeeze()).argsort()[:n]
-    return recommended_book_ids
+prod = Dot(name='Dot-Product', axes=1)([user_vec, item_vec])
 
-# 스트림릿 앱 구현
-st.title("Deep Learning Book Recommender System")
+dense1 = Dense(64, activation='relu')(prod)
+dense2 = Dense(1)(dense1)
 
-# 샘플 유저 ID와 추천할
+model = Model([user_input, item_input], dense2)
+model.compile(loss='mse', optimizer='adam')
+
+model.fit([ratings_matrix[:, 0], ratings_matrix[:, 1]], ratings_matrix[:, 2], batch_size=128, epochs=10, validation_split=0.1)
+
+# 유사한 책 5개 추천
+def recommend_books(book_id):
+    book_idx = book_to_idx[book_id]
+    book_vec = model.get_layer('Embedding_2')(np.array([book_idx]))
+    sim_scores = cosine_similarity(book_vec, model.get_layer('Embedding_2').get_weights()[0])[0]
+    sim_books_idx = np.argsort(sim_scores)[-6:-1]
+    sim_books = [idx_to_book[i] for i in sim_books_idx]
+    return sim_books
+
+# Streamlit 앱 구성
+st.title('Book Recommender')
+book_id = st.text_input('Enter a book ID', key='input')
+if book_id in book_to_idx:
+    recommended_books = recommend_books(book_id)
+    if len(recommended_books) > 0:
+        st.write('Recommended books:')
+        for book in recommended_books:
+            st.write('- ' + book)
+    else:
+        st.write('No recommended books')
+else:
+    st.write('Enter a valid book ID')
 
 
 
