@@ -257,7 +257,10 @@ num_users = len(train['User-ID'].unique())
 num_books = len(train['Book-ID'].unique())
 ratings_matrix = np.zeros((num_users, num_books))
 for row in train.itertuples():
-    ratings_matrix[row[1]-1, row[3]] = row[2]
+    user_idx = int(row[1]) - 1  # row[1]을 정수형으로 변환
+    book_idx = int(row[3])  # row[3]을 정수형으로 변환
+    ratings_matrix[user_idx, book_idx] = row[2]
+
 
 # 딥러닝 모델 구축
 user_input = Input(shape=(1,))
