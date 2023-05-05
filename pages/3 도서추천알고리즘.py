@@ -84,9 +84,7 @@ if book_title in pivot_data.columns:
 else:
     st.write('Enter a valid book title')
     
-st.write("""
-
-""")
+    
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
