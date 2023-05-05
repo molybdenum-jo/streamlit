@@ -281,7 +281,7 @@ model.fit([ratings_matrix[:, 0], ratings_matrix[:, 1]], ratings_matrix[:, 2], ba
 
 # 유사한 책 5개 추천
 def recommend_books(book_id):
-    book_idx = int(book_id.split('_')[-1]) - 1
+    book_idx = book_to_idx[book_id]
     book_vec = model.get_layer('Embedding_2')(np.array([book_idx]))
     sim_scores = cosine_similarity(book_vec, model.get_layer('Embedding_2').get_weights()[0])[0]
     sim_books_idx = np.argsort(sim_scores)[-6:-1]
@@ -291,9 +291,10 @@ def recommend_books(book_id):
 # Streamlit 앱 구성
 st.title('Book Recommender')
 book_id = st.text_input('Enter a book ID', key='input')
-if book_id in idx_to_book:
+if book_id in book_to_idx:
     recommended_books = recommend_books(book_id)
-    if len(recommended_books) > 0:
+    if len(re
+
        
 
 
