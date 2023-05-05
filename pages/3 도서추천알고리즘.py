@@ -85,7 +85,7 @@ else:
     st.write('Enter a valid book title')
     
     
-st.write('✔ 사용자기반 협업필터링')
+st.write('✔ 아이템기반 협업필터링')
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
@@ -121,7 +121,7 @@ def recommend_books(book_title):
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title')
+book_title = st.text_input('Enter a book title', key='book_input')
 if book_title in pivot_data.columns:
     recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
