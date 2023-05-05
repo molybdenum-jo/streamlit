@@ -5,6 +5,7 @@ from surprise import Reader, Dataset, KNNBasic
 import streamlit as st
 import matplotlib as plt
 import plotly.express as px
+pip install -r requirements.txt
 
 
 st.header('📖도서추천알고리즘')
