@@ -85,6 +85,7 @@ else:
     st.write('Enter a valid book title')
     
     
+st.write('✔ 사용자기반 협업필터링')
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
