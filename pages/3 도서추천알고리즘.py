@@ -63,7 +63,8 @@ train = pd.read_csv('data/TRAIN.csv')
 train = train[train['Book-Rating'] >= 4]
 
 # 사용자-아이템 행렬 생성
-pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
+book_rating = pivot_data[book_title].values.astype(int)
+
 
 # 코사인 유사도 계산
 cos_sim = cosine_similarity(pivot_data)
