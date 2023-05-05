@@ -167,7 +167,7 @@ def recommend_books(book_title):
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title')
+book_title = st.text_input('Enter a book title', key='book_title_input')
 if book_title in book_titles:
     recommended_books = recommend_books(book_title)
     st.write('Recommended books:')
