@@ -85,7 +85,7 @@ else:
     st.write('Enter a valid book title')
     
 st.write("""
-✔ 아이템기반 협업필터링
+
 """)
 
 # 데이터 불러오기
