@@ -34,28 +34,6 @@ js = "window.scrollTo(0, document.getElementById('part-1-book').offsetTop);"
 st.markdown("<h3 id='part-1-book'>✅Part 1. 협업 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
 
-
-js = "window.scrollTo(0, document.getElementById('part-2-book').offsetTop);"
-
-    
-st.markdown("<h3 id='part-2-book'>✅Part 2. 콘텐츠 기반 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
-
-
-js = "window.scrollTo(0, document.getElementById('part-3-book').offsetTop);"
-
-st.markdown("<h3 id='part-3-book'>✅Part 3. 행렬 인수분해  기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
-js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
-st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
-js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
-st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
-
-js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
-st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
-
-
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
 
@@ -105,3 +83,26 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
+    
+    
+js = "window.scrollTo(0, document.getElementById('part-2-book').offsetTop);"
+
+    
+st.markdown("<h3 id='part-2-book'>✅Part 2. 콘텐츠 기반 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
+
+
+
+js = "window.scrollTo(0, document.getElementById('part-3-book').offsetTop);"
+
+st.markdown("<h3 id='part-3-book'>✅Part 3. 행렬 인수분해  기반의 추천 시스템</h3>", unsafe_allow_html=True)
+
+js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
+st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
+
+js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
+st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
+
+js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
+st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
+
+
