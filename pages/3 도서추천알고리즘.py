@@ -85,7 +85,9 @@ else:
     st.write('Enter a valid book title')
     
     
-st.write('✔ 아이템기반 협업필터링')
+st.write("""
+✔ 아이템기반 협업필터링
+""")
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
@@ -138,6 +140,41 @@ js = "window.scrollTo(0, document.getElementById('part-2-book').offsetTop);"
     
 st.markdown("<h3 id='part-2-book'>✅Part 2. 콘텐츠 기반 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import streamlit as st
+
+# 데이터 불러오기
+train = pd.read_csv('data/TRAIN.csv')
+
+# 평점이 4점 이상인 데이터만 사용
+train = train[train['Book-Rating'] >= 4]
+
+# 데이터 전처리: 책 제목의 중복 제거 및 TF-IDF 벡터화
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+book_titles = train['Book-Title'].unique()
+tfidf_matrix = tfidf_vectorizer.fit_transform(book_titles)
+cos_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+# 사용자가 선택한 책과 유사한 책 5개 추천
+def recommend_books(book_title):
+    book_idx = np.where(book_titles == book_title)[0][0]
+    similar_books_idx = np.argsort(cos_sim[book_idx])[:-6:-1]
+    similar_books = book_titles[similar_books_idx]
+    return similar_books
+
+# Streamlit 앱 구성
+st.title('Book Recommender')
+book_title = st.text_input('Enter a book title')
+if book_title in book_titles:
+    recommended_books = recommend_books(book_title)
+    st.write('Recommended books:')
+    for book in recommended_books:
+        st.write('- ' + book)
+else:
+    st.write('Enter a valid book title')
 
 
 js = "window.scrollTo(0, document.getElementById('part-3-book').offsetTop);"
