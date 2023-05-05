@@ -233,6 +233,72 @@ else:
 js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
 st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+
+# 데이터 전처리
+@st.cache(allow_output_mutation=True)
+def load_data():
+    df = pd.read_csv("data/TRAIN.csv")
+    # 필요한 컬럼만 추출
+    df = df[["User-ID", "Book-Rating", "Book-ID"]]
+    # User-ID, Book-ID를 각각 0부터 순차적으로 인덱싱
+    df["User-ID"] = df["User-ID"].astype("category").cat.codes
+    df["Book-ID"] = df["Book-ID"].astype("category").cat.codes
+    return df
+
+df = load_data()
+
+# train, test set 분리
+train, test = train_test_split(df, test_size=0.2, random_state=42)
+
+# 모델 구현
+class RecommenderModel(tf.keras.Model):
+    def __init__(self, n_users, n_items, latent_dim):
+        super(RecommenderModel, self).__init__()
+        self.user_embedding = tf.keras.layers.Embedding(n_users, latent_dim)
+        self.item_embedding = tf.keras.layers.Embedding(n_items, latent_dim)
+        self.dense1 = tf.keras.layers.Dense(128, activation='relu')
+        self.dense2 = tf.keras.layers.Dense(64, activation='relu')
+        self.dense3 = tf.keras.layers.Dense(1)
+
+    def call(self, inputs):
+        user_vector = self.user_embedding(inputs[:, 0])
+        item_vector = self.item_embedding(inputs[:, 1])
+        x = tf.concat([user_vector, item_vector], axis=-1)
+        x = self.dense1(x)
+        x = self.dense2(x)
+        x = self.dense3(x)
+        return x
+
+# 모델 학습
+def train_model(train, n_users, n_items, latent_dim):
+    model = RecommenderModel(n_users, n_items, latent_dim)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), loss='mse')
+    model.fit(train[['User-ID', 'Book-ID']].values, train['Book-Rating'].values, epochs=5, verbose=1)
+    return model
+
+n_users = len(df['User-ID'].unique())
+n_items = len(df['Book-ID'].unique())
+latent_dim = 32
+model = train_model(train, n_users, n_items, latent_dim)
+
+# 예측 및 추천
+def predict(user_id, model, df, n=10):
+    user = np.repeat(user_id, len(df['Book-ID'].unique()))
+    items = df['Book-ID'].unique()
+    predictions = model.predict([user, items])
+    recommended_book_ids = (-predictions.squeeze()).argsort()[:n]
+    return recommended_book_ids
+
+# 스트림릿 앱 구현
+st.title("Deep Learning Book Recommender System")
+
+# 샘플 유저 ID와 추천할
+
 
 
     
