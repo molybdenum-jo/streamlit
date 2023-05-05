@@ -63,7 +63,7 @@ train = pd.read_csv('data/TRAIN.csv')
 train = train[train['Book-Rating'] >= 4]
 
 # 사용자-아이템 행렬 생성
-book_rating = pivot_data[book_title].values.astype(int)
+pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0
 
 
 # 코사인 유사도 계산
@@ -79,7 +79,7 @@ user_based_cf.fit(trainset)
 
 # 사용자가 선택한 책과 유사한 책 5개 추천
 def recommend_books(book_title):
-    book_rating = pivot_data[book_title]
+    book_rating = pivot_data[book_title].values.astype(int)
     similar_books_index = cos_sim[np.argsort(book_rating)][-6:-1]
     similar_books = list(pivot_data.index[similar_books_index])
     recommended_books = []
