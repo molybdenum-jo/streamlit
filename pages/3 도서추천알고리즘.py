@@ -260,7 +260,10 @@ num_users = len(train['User-ID'].unique())
 num_books = len(train['Book-ID'].unique())
 ratings_matrix = np.zeros((num_users, num_books))
 for row in train.itertuples():
-    ratings_matrix[int(row[1].split('_')[1])-1, row[3]] = row[2]
+    user_idx = int(row[1].split('_')[1]) - 1
+    book_idx = row[3]
+    rating = row[2]
+    ratings_matrix[user_idx, book_idx] = rating
 
 
 # 딥러닝 모델 구축
@@ -305,7 +308,6 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
-
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
