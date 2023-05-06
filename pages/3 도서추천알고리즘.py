@@ -238,8 +238,17 @@ js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
 st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
+import pandas as pd
+import numpy as np
+from surprise import Reader, Dataset, SVD
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
+
+# 평점이 4점 이상인 데이터만 사용
+train = train[train['Book-Rating'] >= 4]
 
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
@@ -276,18 +285,16 @@ def recommend_books(book_title):
     
     recommended_books = []
     for book in similar_books:
-        if book != book_title:
-            _, _, _, est, _ = svd_model.predict(uid=1, iid=book)
-            if est >= 4.0:
-                recommended_books.append(book)
+        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
+        if est >= 4.0:
+            recommended_books.append(book)
     return recommended_books
 
-import random
-import string
-
 # Streamlit 앱 구성
+import streamlit as st
+
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)))
+book_title = st.text_input('Enter a book title', key='input')
 if book_title in pivot_data.columns:
     recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
