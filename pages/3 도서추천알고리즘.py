@@ -243,20 +243,6 @@ js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
 st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
-import pandas as pd
-import numpy as np
-from surprise import Reader, Dataset, SVD
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import CountVectorizer
-
-import pandas as pd
-import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from surprise import Dataset, Reader, SVD
-import streamlit as st
-import random
-import string
 
 import pandas as pd
 import numpy as np
@@ -289,17 +275,16 @@ count_vect = CountVectorizer()
 book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
-# 모델 합치기
 def recommend_books(book_title):
     # SVD 모델
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], 
-                                                                     pivot_data.loc[:, [book_title]]))[-6:-1])
-    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
-    
+    book_index = pivot_data.columns.get_loc(book_title)
+    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.iloc[:, book_index].values.reshape(1,-1), 
+                                                             pivot_data.drop(columns=[book_title]).values))[-6:-1])
+    svd_similar_books = list(pivot_data.drop(columns=[book_title]).columns[svd_similar_books_index])
+
     # Item-based 모델
-    book_title_matrix = count_vect.transform([book_title])
-    book_title_sim = cosine_similarity(book_title_matrix, book_title_matrix.T)
-    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, 0])[-6:-1])
+    book_title_idx = count_vect.get_feature_names().index(book_title)
+    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
     item_similar_books = list(train['Book-Title'][item_similar_books_index])
 
     # 사용자가 선택한 책과 유사한 책 5개 추천
@@ -311,6 +296,7 @@ def recommend_books(book_title):
         if est >= 4.0:
             recommended_books.append(book)
     return recommended_books
+
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
