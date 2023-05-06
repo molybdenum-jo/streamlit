@@ -242,64 +242,57 @@ from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Conca
 from tensorflow.keras.models import Model
 import streamlit as st
 
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
 # 데이터 불러오기
-train = pd.read_csv('data/TRAIN.csv')
-train = train.dropna(subset=['Book-Rating'])
-train = train[pd.to_numeric(train['Book-Rating'], errors='coerce').notnull()] 
+data = pd.read_csv('data/TRAIN.csv')
+data = data[data['Book-Rating'] >= 4]
 
+# 인덱싱을 위한 딕셔너리 생성
+users = data['User-ID'].unique()
+books = data['Book-Title'].unique()
+user_to_idx = {user: idx for idx, user in enumerate(users)}
+book_to_idx = {book: idx for idx, book in enumerate(books)}
 
-# 평점이 4점 이상인 데이터만 사용
-train = train[train['Book-Rating'] >= 4]
+# 데이터셋 생성
+data['user_id'] = data['User-ID'].map(user_to_idx)
+data['book_id'] = data['Book-Title'].map(book_to_idx)
+dataset = data[['user_id', 'book_id', 'Book-Rating']]
 
-# Book-ID에 고유한 정수 인덱스 부여
-unique_books = list(set(train['Book-ID']))
-book_to_idx = {book: i for i, book in enumerate(unique_books)}
-idx_to_book = {i: book for book, i in book_to_idx.items()}
-train['Book-ID'] = train['Book-ID'].map(book_to_idx)
+# train, validation 데이터셋 분리
+train, val = train_test_split(dataset, test_size=0.2, random_state=42)
 
-# 사용자-아이템 행렬 생성
-num_users = len(train['User-ID'].unique())
-num_books = len(train['Book-ID'].unique())
-ratings_matrix = np.zeros((num_users, num_books))
-for row in data:
-    try:
-        user_idx = int(row[0].split('_')[1])-1
-        book_idx = row[1]
-        rating = int(row[2])
-        ratings_matrix[user_idx, book_idx] = rating
-    except ValueError:
-        continue
+# 모델 생성 및 학습
+num_users = len(users)
+num_books = len(books)
+embedding_size = 20
 
+user_input = tf.keras.layers.Input(shape=(1,))
+book_input = tf.keras.layers.Input(shape=(1,))
 
+user_embedding = tf.keras.layers.Embedding(num_users, embedding_size)(user_input)
+book_embedding = tf.keras.layers.Embedding(num_books, embedding_size)(book_input)
 
-# 딥러닝 모델 구축
-user_input = Input(shape=(1,))
-item_input = Input(shape=(1,))
+merged = tf.keras.layers.Dot(axes=2)([user_embedding, book_embedding])
+model = tf.keras.models.Model(inputs=[user_input, book_input], outputs=[merged])
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit([train['user_id'], train['book_id']], train['Book-Rating'], batch_size=32, epochs=5, validation_data=([val['user_id'], val['book_id']], val['Book-Rating']))
 
-user_embedding = Embedding(num_users, 20)(user_input)
-user_vec = Flatten()(user_embedding)
+# 모델을 이용한 추천 함수
+def recommend_books(book_title, n=5):
+    book_id = book_to_idx[book_title]
+    book_vector = tf.expand_dims(book_id, axis=0)
+    user_vector = tf.range(num_users)
+    user_vector = tf.expand_dims(user_vector, axis=-1)
+    predictions = model.predict([user_vector, book_vector])
+    prediction_values = np.squeeze(predictions)
+    top_n = np.argsort(-prediction_values)[:n]
+    recommended_books = [books[idx] for idx in top_n]
+    return recommended_books
 
-item_embedding = Embedding(num_books, 20)(item_input)
-item_vec = Flatten()(item_embedding)
-
-prod = Dot(name='Dot-Product', axes=1)([user_vec, item_vec])
-
-dense1 = Dense(64, activation='relu')(prod)
-dense2 = Dense(1)(dense1)
-
-model = Model([user_input, item_input], dense2)
-model.compile(loss='mse', optimizer='adam')
-
-model.fit([ratings_matrix[:, 0], ratings_matrix[:, 1]], ratings_matrix[:, 2], batch_size=128, epochs=10, validation_split=0.1)
-
-# 유사한 책 5개 추천
-def recommend_books(book_id):
-    book_idx = book_to_idx[book_id]
-    book_vec = model.get_layer('Embedding_2')(np.array([book_idx]))
-    sim_scores = cosine_similarity(book_vec, model.get_layer('Embedding_2').get_weights()[0])[0]
-    sim_books_idx = np.argsort(sim_scores)[-6:-1]
-    sim_books = [idx_to_book[i] for i in sim_books_idx]
-    return sim_books
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
