@@ -243,7 +243,7 @@ st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
-결과물: 딥 러닝 모델(신경망 기반 추천 모델 또는 잠재 요인 모델)을 구현하고, 모델의 평점 예측 성능을 평가한다. 다른 추천 시스템과 성능을 비교하여 딥 러닝 기반 추천 시스템의 효과를 분석한다.
+st.write('결과물: 딥 러닝 모델(신경망 기반 추천 모델 또는 잠재 요인 모델)을 구현하고, 모델의 평점 예측 성능을 평가한다. 다른 추천 시스템과 성능을 비교하여 딥 러닝 기반 추천 시스템의 효과를 분석한다.')
 
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
