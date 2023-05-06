@@ -254,4 +254,3 @@ js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
 
 st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
 st.write('결과물: 그리드 서치, 랜덤 서치, 베이지안 최적화 등의 기법을 사용하여 모델의 하이퍼파라미터를 최적화한다. 최적화된 하이퍼파라미터를 사용하여 모델의 성능을 평가하고, 기본 하이퍼파라미터를 사용한 모델과 성능을 비교하여 최적화 기법의 효과를 분석한다.')
-
