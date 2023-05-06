@@ -273,6 +273,7 @@ def recommend_books(book_title):
                                                                  pivot_data.iloc[:, book_title_index].values.reshape(1, -1)))[:, -6:-1].reshape(-1))
     svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
 
+
     # Item-based 모델
     book_title_idx = count_vect.get_feature_names().index(book_title)
     item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
