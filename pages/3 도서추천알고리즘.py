@@ -281,15 +281,19 @@ def recommend_books(book_title):
     
     # 두 모델 결과 합치기
     similar_books = list(set(svd_similar_books + item_similar_books))
-    
+ 
+
+# 사용자가 선택한 책과 유사한 책 5개 추천
+def recommend_books(book_title):
+    book_rating = pivot_data[book_title]
+    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
+    similar_books = list(pivot_data.columns[similar_books_index])
     recommended_books = []
     for book in similar_books:
-        if book != book_title:
-            _, _, _, est, _ = svd_model.predict(uid=1, iid=book)
-            if est >= 4.0:
-                recommended_books.append(book)
+        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
+        if est >= 4.0:
+            recommended_books.append(book)
     return recommended_books
-
 import random
 import string
 
