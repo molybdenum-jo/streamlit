@@ -275,7 +275,7 @@ book_title_index = pivot_data.columns.get_loc(book_title)
 svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.iloc[:, :book_title_index].join(pivot_data.iloc[:, book_title_index+1:]), 
                                                                  pivot_data.iloc[:, book_title_index].values.reshape(1, -1)))[:, -6:-1].reshape(-1))
 svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
-ot_data.columns[svd_similar_books_index])
+ot_data.columns[svd_similar_books_index]
     
 # Item-based 모델
 book_title_idx = count_vect.get_feature_names().index(book_title)
