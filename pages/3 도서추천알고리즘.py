@@ -296,9 +296,8 @@ def predict_books(input_data):
 input_data = {'The Da Vinci Code': 
 
 
-
+js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
-
 
 
 js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
