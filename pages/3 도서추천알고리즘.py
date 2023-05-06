@@ -262,7 +262,6 @@ count_vect = CountVectorizer()
 book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
-# 모델 합치기
 def recommend_books(book_title):
     book_rating = pivot_data[book_title]
     
@@ -278,6 +277,9 @@ def recommend_books(book_title):
     
     # 두 모델 결과 합치기
     similar_books = list(set(svd_similar_books + item_similar_books))
+    return similar_books
+
+
     
 
 
