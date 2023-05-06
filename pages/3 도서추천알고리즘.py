@@ -164,7 +164,10 @@ def recommend_books(book_title):
     book_idx = np.where(book_titles == book_title)[0][0]
     similar_books_idx = np.argsort(cos_sim[book_idx])[:-6:-1]
     similar_books = book_titles[similar_books_idx]
+    if book_title in similar_books:
+        similar_books = np.delete(similar_books, np.where(similar_books == book_title))
     return similar_books
+
 
 
 # Streamlit 앱 구성
