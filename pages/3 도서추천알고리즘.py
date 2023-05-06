@@ -268,10 +268,11 @@ def recommend_books(book_title):
     book_rating = pivot_data[book_title]
     
     # SVD 모델
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], 
-                                                                     pivot_data.loc[:, [book_title]]))[-6:-1])
-    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
-    
+book_title_index = pivot_data.columns.get_loc(book_title)
+svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.iloc[:, :book_title_index].join(pivot_data.iloc[:, book_title_index+1:]), 
+                                                                 pivot_data.iloc[:, book_title_index].values.reshape(1, -1)))[:, -6:-1].reshape(-1))
+svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
+
     # Item-based 모델
     book_title_idx = count_vect.get_feature_names().index(book_title)
     item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
@@ -293,7 +294,7 @@ import string
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)))
+book_title = st.text_input('Enter a book title', key=f"book_title")
 if book_title in pivot_data.columns:
     recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
