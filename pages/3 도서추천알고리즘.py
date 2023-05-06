@@ -333,7 +333,7 @@ num_users = len(train['User-ID'].unique())
 num_books = len(train['Book-ID'].unique())
 ratings_matrix = np.zeros((num_users, num_books))
 for row in train.itertuples():
-    ratings_matrix[row[1]-1, row[3]] = row[2]
+    ratings_matrix[int(row[1])-1, int(row[3])] = row[2]
 
 # 딥러닝 모델 구축
 user_input = Input(shape=(1,))
