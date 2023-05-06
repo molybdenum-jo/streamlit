@@ -252,6 +252,7 @@ from surprise import Dataset, Reader, SVD
 import streamlit as st
 import random
 import string
+from sklearn.model_selection import train_test_split
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
@@ -262,6 +263,8 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
+# 데이터 나누기
+trainset, testset = train_test_split(train, test_size=0.2, random_state=42)
 
 # SVD 모델 구축
 reader = Reader(rating_scale=(1, 10))
@@ -276,10 +279,9 @@ count_vect = CountVectorizer()
 book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
-ensemble_preds = []
-alpha = 0.999  # 가중치 설정 (0과 1 사이의 값을 선택)
-for i in range(len(svd_model)):
-    ensemble_preds.append(alpha * svd_model[i] + (1 - alpha) * item_based_cf[i])
+svd_preds = svd_model.test(testset)
+item_preds = item_based_recommendation(user_id, book_title_sim)
+ensemble_preds = [(0.7 * svd_pred.est) + (0.3 * item_pred) for svd_pred, item_pred in zip(svd_preds, item_preds)]
 
 # 사용자가 선택한 책과 유사한 책 5개 추천
 def recommend_books(book_title):
@@ -307,4 +309,5 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
+
 
