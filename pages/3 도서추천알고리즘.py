@@ -279,7 +279,7 @@ item_based_cf.fit(trainset)
 # 앙상블 예측 (가중 평균)
 ensemble_preds = []
 alpha = 0.999  # 가중치 설정 (0과 1 사이의 값을 선택)
-for i in range(len(svd_preds)):
+for i in range(len(svd_model)):
     ensemble_preds.append(alpha * svd_model[i] + (1 - alpha) * item_based_cf[i])
     
 # Item-based 앙상블 모델 구축
