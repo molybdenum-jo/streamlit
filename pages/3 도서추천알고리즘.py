@@ -241,9 +241,10 @@ st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
-
-
-st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+import pickle
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
@@ -254,51 +255,44 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
-# SVD 모델 구축
-reader = Reader(rating_scale=(1, 10))
-data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
-trainset = data.build_full_trainset()
-svd_model = SVD(n_factors=20, reg_all=0.02)
-svd_model.fit(trainset)
+# 딥러닝 모델 학습
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(64, activation='relu', input_shape=(pivot_data.shape[1],)),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(pivot_data.shape[1])
+])
+model.compile(loss='mse', optimizer='adam')
+model.fit(pivot_data.values, pivot_data.values, epochs=10, batch_size=64)
 
-# Item-based 앙상블 모델 구축
-# 책 제목 기반으로 벡터화
-count_vect = CountVectorizer()
-book_title_matrix = count_vect.fit_transform(train['Book-Title'])
-book_title_sim = cosine_similarity(book_title_matrix)
+# 모델 저장
+with open('model.pkl', 'wb') as f:
+    pickle.dump(model, f)
 
-svd_preds = svd_model.test(testset)
-item_preds = item_based_recommendation(user_id, book_title_sim)
-ensemble_preds = [(0.7 * svd_pred.est) + (0.3 * item_pred) for svd_pred, item_pred in zip(svd_preds, item_preds)]
+# 스트림릿에서 모델 불러오기
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
-# 사용자가 선택한 책과 유사한 책 5개 추천
-def recommend_books(book_title):
-    book_rating = pivot_data[book_title]
-    svd_similar_books = [book for book, _ in svd_model.similar_items(pivot_data.columns.get_loc(book_title))]
-    item_similar_books = item_based_recommendation(user_id, book_title_sim)
-    similar_books = list(set(svd_similar_books + item_similar_books))
-    similar_books_index = np.unique(np.argsort(book_title_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
-    similar_books = list(pivot_data.columns[similar_books_index])
-    recommended_books = []
-    for book in similar_books:
-        _, _, _, est, _ = svd_model.predict(uid=user_id, iid=book)
-        if est >= 4.0:
-            recommended_books.append(book)
+# 입력 데이터 처리
+def process_input_data(input_data):
+    processed_data = np.zeros((1, pivot_data.shape[1]))
+    for title, rating in input_data.items():
+        if title in pivot_data.columns:
+            processed_data[0, pivot_data.columns.get_loc(title)] = rating
+    return processed_data
+
+# 모델 예측
+def predict_books(input_data):
+    processed_data = process_input_data(input_data)
+    predictions = model.predict(processed_data)
+    recommended_books = pivot_data.columns[np.argsort(-predictions[0])][:10]
     return recommended_books
 
-# Streamlit 앱 구성
-st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key='input')
-if book_title in pivot_data.columns:
-    recommended_books = recommend_books(book_title)
-    if len(recommended_books) > 0:
-        st.write('Recommended books:')
-        for book in recommended_books:
-            st.write('- ' + book)
-    else:
-        st.write('No recommended books')
-else:
-    st.write('Enter a valid book title')
+# 결과 반환
+input_data = {'The Da Vinci Code': 
+
+
+
+st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
 
 
