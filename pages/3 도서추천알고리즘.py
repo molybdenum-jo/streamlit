@@ -317,7 +317,23 @@ from surprise import SVD
 from sklearn.metrics.pairwise import cosine_similarity
 
 # 데이터 불러오기
-train = pd.read_csv('data/TRAIN.csv')
+import numpy as np
+import pandas as pd
+
+train_df = pd.read_csv('data/TRAIN.csv')
+
+n_users = len(train_df['user_id'].unique())
+n_books = len(train_df['book_id'].unique())
+
+# ratings_matrix 초기화
+ratings_matrix = np.zeros((n_users, n_books))
+
+for row in train_df.itertuples():
+    user_idx = int(row[1]) - 1
+    book_idx = int(row[3])
+    rating = row[2]
+    ratings_matrix[user_idx, book_idx] = rating
+
 
 # 평점이 4점 이상인 데이터만 사용
 train = train[train['Book-Rating'] >= 4]
