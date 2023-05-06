@@ -162,7 +162,7 @@ cos_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 # 사용자가 선택한 책과 유사한 책 5개 추천
 def recommend_books(book_title):
     book_idx = np.where(book_titles == book_title)[0][0]
-    similar_books_idx = np.argsort(cos_sim[book_idx])[:-6:-1]
+    similar_books_idx = np.argsort(cos_sim[book_idx])[:-5:-1]
     similar_books = book_titles[similar_books_idx]
     return similar_books[similar_books != book_title][:5]
 
