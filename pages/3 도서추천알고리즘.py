@@ -247,9 +247,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
 
-# 평점이 4점 이상인 데이터만 사용
-train = train[train['Book-Rating'] >= 4]
-
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
@@ -285,9 +282,10 @@ def recommend_books(book_title):
     
     recommended_books = []
     for book in similar_books:
-        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
-        if est >= 4.0:
-            recommended_books.append(book)
+        if book != book_title:
+            _, _, _, est, _ = svd_model.predict(uid=1, iid=book)
+            if est >= 4.0:
+                recommended_books.append(book)
     return recommended_books
 
 import random
@@ -306,5 +304,6 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
+
 
   
