@@ -263,15 +263,21 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
-# 데이터 나누기
-trainset, testset = train_test_split(train, test_size=0.2, random_state=42)
-
-# SVD 모델 구축
+# Surprise 데이터셋 생성
 reader = Reader(rating_scale=(1, 10))
 data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
+
+# 학습 데이터에 있는 모든 사용자-아이템 쌍을 포함하는 데이터셋 생성
 trainset = data.build_full_trainset()
+
+# SVD 모델 구축 및 학습
 svd_model = SVD(n_factors=20, reg_all=0.02)
 svd_model.fit(trainset)
+
+# Surprise 테스트 데이터 생성
+testset = trainset.build_anti_testset()
+svd_preds = svd_model.test(testset)
+
 
 # Item-based 앙상블 모델 구축
 # 책 제목 기반으로 벡터화
