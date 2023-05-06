@@ -275,37 +275,21 @@ count_vect = CountVectorizer()
 book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
-def recommend_books(book_title):
-    # SVD 모델
-    book_index = pivot_data.columns.get_loc(book_title)
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.iloc[:, book_index].values.reshape(1,-1), 
-                                                             pivot_data.drop(columns=[book_title]).values))[-6:-1])
-    svd_similar_books = list(pivot_data.drop(columns=[book_title]).columns[svd_similar_books_index])
-
-    # Item-based 모델
-    book_title_idx = count_vect.get_feature_names().index(book_title)
-    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
-    item_similar_books = list(train['Book-Title'][item_similar_books_index])
-
-    # 사용자가 선택한 책과 유사한 책 5개 추천
-    similar_books = list(set(svd_similar_books + item_similar_books))
-    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
-    similar_books = list(pivot_data.columns[similar_books_index])
-    recommended_books = []
-    for book in similar_books:
-        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
-        if est >= 4.0:
-            recommended_books.append(book)
-    return recommended_books
+svd_preds = svd_model.test(testset)
+item_preds = item_based_recommendation(user_id, book_title_sim)
+ensemble_preds = [(0.7 * svd_pred.est) + (0.3 * item_pred) for svd_pred, item_pred in zip(svd_preds, item_preds)]
 
 # 사용자가 선택한 책과 유사한 책 5개 추천
 def recommend_books(book_title):
     book_rating = pivot_data[book_title]
-    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
+    svd_similar_books = [book for book, _ in svd_model.similar_items(pivot_data.columns.get_loc(book_title))]
+    item_similar_books = item_based_recommendation(user_id, book_title_sim)
+    similar_books = list(set(svd_similar_books + item_similar_books))
+    similar_books_index = np.unique(np.argsort(book_title_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
     similar_books = list(pivot_data.columns[similar_books_index])
     recommended_books = []
     for book in similar_books:
-        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
+        _, _, _, est, _ = svd_model.predict(uid=user_id, iid=book)
         if est >= 4.0:
             recommended_books.append(book)
     return recommended_books
@@ -323,4 +307,3 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
-
