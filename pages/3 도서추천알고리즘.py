@@ -289,7 +289,8 @@ def recommend_books(book_title):
 
     # 사용자가 선택한 책과 유사한 책 5개 추천
     similar_books = list(set(svd_similar_books + item_similar_books))
-    similar_books = [book for book in similar_books if book != book_title]
+    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
+    similar_books = list(pivot_data.columns[similar_books_index])
     recommended_books = []
     for book in similar_books:
         _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
@@ -297,10 +298,21 @@ def recommend_books(book_title):
             recommended_books.append(book)
     return recommended_books
 
+# 사용자가 선택한 책과 유사한 책 5개 추천
+def recommend_books(book_title):
+    book_rating = pivot_data[book_title]
+    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
+    similar_books = list(pivot_data.columns[similar_books_index])
+    recommended_books = []
+    for book in similar_books:
+        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
+        if est >= 4.0:
+            recommended_books.append(book)
+    return recommended_books
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)))
+book_title = st.text_input('Enter a book title', key='input')
 if book_title in pivot_data.columns:
     recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
