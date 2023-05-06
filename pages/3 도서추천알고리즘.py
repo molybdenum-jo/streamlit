@@ -234,67 +234,65 @@ js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
 
 st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
+js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
-import pandas as pd
+st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
+
+  import pandas as pd
 import numpy as np
+from surprise import Reader, Dataset, SVD
 from sklearn.metrics.pairwise import cosine_similarity
-from tensorflow.keras.layers import Input, Embedding, Flatten, Dot, Dense, Concatenate
-from tensorflow.keras.models import Model
-import streamlit as st
-
-import tensorflow as tf
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
 
 # 데이터 불러오기
-data = pd.read_csv('data/TRAIN.csv')
-data = data[data['Book-Rating'] >= 4]
+train = pd.read_csv('data/TRAIN.csv')
 
-# 인덱싱을 위한 딕셔너리 생성
-users = data['User-ID'].unique()
-books = data['Book-Title'].unique()
-user_to_idx = {user: idx for idx, user in enumerate(users)}
-book_to_idx = {book: idx for idx, book in enumerate(books)}
+# 평점이 4점 이상인 데이터만 사용
+train = train[train['Book-Rating'] >= 4]
 
-# 데이터셋 생성
-data['user_id'] = data['User-ID'].map(user_to_idx)
-data['book_id'] = data['Book-Title'].map(book_to_idx)
-dataset = data[['user_id', 'book_id', 'Book-Rating']]
+# 사용자-아이템 행렬 생성
+pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
-# train, validation 데이터셋 분리
-train, val = train_test_split(dataset, test_size=0.2, random_state=42)
+# SVD 모델 구축
+reader = Reader(rating_scale=(1, 10))
+data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
+trainset = data.build_full_trainset()
+svd_model = SVD(n_factors=20, reg_all=0.02)
+svd_model.fit(trainset)
 
-# 모델 생성 및 학습
-num_users = len(users)
-num_books = len(books)
-embedding_size = 20
+# Item-based 앙상블 모델 구축
+# 책 제목 기반으로 벡터화
+count_vect = CountVectorizer()
+book_title_matrix = count_vect.fit_transform(train['Book-Title'])
+book_title_sim = cosine_similarity(book_title_matrix)
 
-user_input = tf.keras.layers.Input(shape=(1,))
-book_input = tf.keras.layers.Input(shape=(1,))
-
-user_embedding = tf.keras.layers.Embedding(num_users, embedding_size)(user_input)
-book_embedding = tf.keras.layers.Embedding(num_books, embedding_size)(book_input)
-
-merged = tf.keras.layers.Dot(axes=2)([user_embedding, book_embedding])
-model = tf.keras.models.Model(inputs=[user_input, book_input], outputs=[merged])
-model.compile(optimizer='adam', loss='mean_squared_error')
-model.fit([train['user_id'], train['book_id']], train['Book-Rating'], batch_size=32, epochs=5, validation_data=([val['user_id'], val['book_id']], val['Book-Rating']))
-
-# 모델을 이용한 추천 함수
-def recommend_books(book_title, n=5):
-    book_id = book_to_idx[book_title]
-    book_vector = tf.expand_dims(book_id, axis=0)
-    user_vector = tf.range(num_users)
-    user_vector = tf.expand_dims(user_vector, axis=-1)
-    predictions = model.predict([user_vector, book_vector])
-    prediction_values = np.squeeze(predictions)
-    top_n = np.argsort(-prediction_values)[:n]
-    recommended_books = [books[idx] for idx in top_n]
+# 모델 합치기
+def recommend_books(book_title):
+    book_rating = pivot_data[book_title]
+    
+    # SVD 모델
+    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], 
+                                                                     pivot_data.loc[:, [book_title]]))[-6:-1])
+    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
+    
+    # Item-based 모델
+    book_title_idx = count_vect.get_feature_names().index(book_title)
+    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
+    item_similar_books = list(train['Book-Title'][item_similar_books_index])
+    
+    # 두 모델 결과 합치기
+    similar_books = list(set(svd_similar_books + item_similar_books))
+    
+    recommended_books = []
+    for book in similar_books:
+        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
+        if est >= 4.0:
+            recommended_books.append(book)
     return recommended_books
 
-
 # Streamlit 앱 구성
+import streamlit as st
+
 st.title('Book Recommender')
 book_title = st.text_input('Enter a book title', key='input')
 if book_title in pivot_data.columns:
@@ -307,6 +305,4 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
-
-
-    
+  
