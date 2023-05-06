@@ -261,11 +261,14 @@ train['Book-ID'] = train['Book-ID'].map(book_to_idx)
 num_users = len(train['User-ID'].unique())
 num_books = len(train['Book-ID'].unique())
 ratings_matrix = np.zeros((num_users, num_books))
-for row in train.itertuples():
-    rating = int(row[2])
-    user_idx = int(row[1].split('_')[1])-1
-    book_idx = row[3]
-    ratings_matrix[user_idx, book_idx] = rating
+for row in data:
+    try:
+        user_idx = int(row[0].split('_')[1])-1
+        book_idx = row[1]
+        rating = int(row[2])
+        ratings_matrix[user_idx, book_idx] = rating
+    except ValueError:
+        continue
 
 
 
