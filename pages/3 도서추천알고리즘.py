@@ -337,6 +337,8 @@ for row in train_df.itertuples():
     rating = row[2]
     ratings_matrix[user_idx, book_idx] = rating
 
+train = train[train['Book-Rating'].str.isnumeric()]  # 숫자로만 이루어진 Book-Rating만 선택
+train['Book-Rating'] = train['Book-Rating'].astype(int)  # Book-Rating 열을 정수형으로 변환
 
 # 평점이 4점 이상인 데이터만 사용
 train = train[train['Book-Rating'] >= 4]
