@@ -166,6 +166,7 @@ def recommend_books(book_title):
     similar_books = book_titles[similar_books_idx]
     return similar_books
 
+
 # Streamlit 앱 구성
 st.title('Book Recommender')
 book_title = st.text_input('Enter a book title', key='book_title_input')
