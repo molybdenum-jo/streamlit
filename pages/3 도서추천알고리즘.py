@@ -112,11 +112,11 @@ item_based_cf.fit(trainset)
 # 사용자가 선택한 책과 유사한 책 5개 추천
 def recommend_books(book_title):
     book_rating = pivot_data[book_title]
-    similar_books_index = np.unique(np.argsort(cos_sim[pivot_data.columns.get_loc(book_title)])[-6:-1])
+    similar_books_index = np.unique(np.argsort(book_rating)[-6:-1])
     similar_books = list(pivot_data.columns[similar_books_index])
     recommended_books = []
     for book in similar_books:
-        _, _, _, est, _ = item_based_cf.predict(uid=book_title, iid=book)
+        _, _, _, est, _ = user_based_cf.predict(uid=book, iid=book_title)
         if est >= 4.0:
             recommended_books.append(book)
     return recommended_books
