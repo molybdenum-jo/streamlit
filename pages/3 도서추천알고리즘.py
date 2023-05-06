@@ -270,25 +270,27 @@ book_title_sim = cosine_similarity(book_title_matrix)
 def recommend_books(book_title):
     book_rating = pivot_data[book_title]
     
-    # SVD 모델
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], 
-                                                                     pivot_data.loc[:, [book_title]]))[-6:-1])
-    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
+# SVD 모델
+book_title_index = pivot_data.columns.get_loc(book_title)
+svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.iloc[:, :book_title_index].join(pivot_data.iloc[:, book_title_index+1:]), 
+                                                                 pivot_data.iloc[:, book_title_index].values.reshape(1, -1)))[:, -6:-1].reshape(-1))
+svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
+ot_data.columns[svd_similar_books_index])
     
-    # Item-based 모델
-    book_title_idx = count_vect.get_feature_names().index(book_title)
-    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
-    item_similar_books = list(train['Book-Title'][item_similar_books_index])
+# Item-based 모델
+book_title_idx = count_vect.get_feature_names().index(book_title)
+item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
+item_similar_books = list(train['Book-Title'][item_similar_books_index])
     
-    # 두 모델 결과 합치기
-    similar_books = list(set(svd_similar_books + item_similar_books))
+# 두 모델 결과 합치기
+similar_books = list(set(svd_similar_books + item_similar_books))
     
-    recommended_books = []
-    for book in similar_books:
-        _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
-        if est >= 4.0:
-            recommended_books.append(book)
-    return recommended_books
+recommended_books = []
+for book in similar_books:
+     _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
+     if est >= 4.0:
+        recommended_books.append(book)
+ return recommended_books
 
 # Streamlit 앱 구성
 import streamlit as st
