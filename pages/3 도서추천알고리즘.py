@@ -262,8 +262,6 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
-# 데이터 나누기
-trainset, testset = train_test_split(train, test_size=0.2, random_state=42)
 
 # SVD 모델 구축
 reader = Reader(rating_scale=(1, 10))
