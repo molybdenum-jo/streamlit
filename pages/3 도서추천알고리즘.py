@@ -240,60 +240,7 @@ js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
 st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
-st.write('결과물: 딥 러닝 모델(신경망 기반 추천 모델 또는 잠재 요인 모델)을 구현하고, 모델의 평점 예측 성능을 평가한다. 다른 추천 시스템과 성능을 비교하여 딥 러닝 기반 추천 시스템의 효과를 분석한다.')
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-import pickle
 
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-import pickle
-
-# 데이터 불러오기
-train = pd.read_csv('data/TRAIN.csv')
-
-# 평점이 4점 이상인 데이터만 사용
-train = train[train['Book-Rating'] >= 4]
-
-# 사용자-아이템 행렬 생성
-pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
-
-# 딥러닝 모델 학습
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(64, activation='relu', input_shape=(pivot_data.shape[1],)),
-    tf.keras.layers.Dense(32, activation='relu'),
-    tf.keras.layers.Dense(pivot_data.shape[1])
-])
-model.compile(loss='mse', optimizer='adam')
-model.fit(pivot_data.values, pivot_data.values, epochs=10, batch_size=64)
-
-# 모델 저장
-with open('model.pkl', 'wb') as f:
-    pickle.dump(model, f)
-
-# 스트림릿에서 모델 불러오기
-with open('model.pkl', 'rb') as f:
-    model = pickle.load(f)
-
-# 입력 데이터 처리
-def process_input_data(input_data):
-    processed_data = np.zeros((1, pivot_data.shape[1]))
-    for title, rating in input_data.items():
-        if title in pivot_data.columns:
-            processed_data[0, pivot_data.columns.get_loc(title)] = rating
-    return processed_data
-
-# 모델 예측
-def predict_books(input_data):
-    processed_data = process_input_data(input_data)
-    predictions = model.predict(processed_data)
-    recommended_books = pivot_data.columns[np.argsort(-predictions[0])][:10]
-    return recommended_books
-
-# 결과 반환
-input_data = {'The Da Vinci Code': 
 
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
@@ -305,64 +252,4 @@ js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
 
 st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
 st.write('결과물: 그리드 서치, 랜덤 서치, 베이지안 최적화 등의 기법을 사용하여 모델의 하이퍼파라미터를 최적화한다. 최적화된 하이퍼파라미터를 사용하여 모델의 성능을 평가하고, 기본 하이퍼파라미터를 사용한 모델과 성능을 비교하여 최적화 기법의 효과를 분석한다.')
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split, GridSearchCV
-from tensorflow.keras.layers import Input, Dense, Embedding, Flatten, Dot
-from tensorflow.keras.models import Model
-from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
-
-def create_pivot_data():
-    # 데이터 불러오기
-    train = pd.read_csv('data/TRAIN.csv')
-
-    # 평점이 4점 이상인 데이터만 사용
-    train = train[train['Book-Rating'] >= 4]
-
-    # 사용자-아이템 행렬 생성
-    pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
-
-    return pivot_data
-
-def create_model(embedding_size=10, optimizer='adam'):
-    # 사용자-아이템 행렬 생성
-    pivot_data = create_pivot_data()
-
-    # 훈련 데이터와 테스트 데이터로 분리
-    train_data, test_data = train_test_split(pivot_data, test_size=0.2)
-
-    # 모델 구성
-    num_users, num_items = len(pivot_data), len(pivot_data.columns)
-    input_layer = Input(shape=(1,))
-    embedding_layer = Embedding(num_users, embedding_size)(input_layer)
-    flatten_layer = Flatten()(embedding_layer)
-    output_layer = Dense(num_items, activation='relu')(flatten_layer)
-    dot_layer = Dot(axes=1)([output_layer, embedding_layer])
-    model = Model(inputs=[input_layer], outputs=[dot_layer])
-    model.compile(loss='mse', optimizer=optimizer, metrics=['mae'])
-
-    return model
-
-    def grid_search():
-    # 모델 생성 함수를 KerasRegressor로 래핑
-    model = KerasRegressor(build_fn=create_model, verbose=0)
-
-    # 그리드서치를 수행할 하이퍼파라미터 값들
-    embedding_size = [10, 20, 30]
-    optimizer = ['adam', 'sgd']
-
-    # 그리드서치를 수행할 매개변수 그리드
-    param_grid = dict(embedding_size=embedding_size, optimizer=optimizer)
-
-    # 그리드서치 수행
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3, verbose=2)
-    grid_result = grid.fit(X=np.array(train_data.index), y=train_data.values)
-
-    # 최적의 하이퍼파라미터와 평가 지표 출력
-    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
-    means = grid_result.cv_results_['mean_test_score']
-    stds = grid_result.cv_results_['std_test_score']
-    params = grid_result.cv_results_['params']
-    for mean, stdev, param in zip(means, stds, params):
-        print("%f (%f) with: %r" % (mean, stdev
 
