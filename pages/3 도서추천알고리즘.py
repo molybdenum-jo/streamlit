@@ -262,42 +262,24 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
+# 데이터 나누기
+trainset, testset = train_test_split(train, test_size=0.2, random_state=42)
+
 # SVD 모델 구축
 reader = Reader(rating_scale=(1, 10))
 data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
 trainset = data.build_full_trainset()
-
-
-# SVD 모델 구축
 svd_model = SVD(n_factors=20, reg_all=0.02)
 svd_model.fit(trainset)
 
-# 아이템기반 모델 구축
-item_based_cf = KNNBasic(sim_options=sim_options)
-item_based_cf.fit(trainset)
-
-# 앙상블 예측 (가중 평균)
-ensemble_preds = []
-alpha = 0.999  # 가중치 설정 (0과 1 사이의 값을 선택)
-for i in range(len(svd_model)):
-    ensemble_preds.append(alpha * svd_model[i] + (1 - alpha) * item_based_cf[i])
-    
 # Item-based 앙상블 모델 구축
 # 책 제목 기반으로 벡터화
 count_vect = CountVectorizer()
 book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
-# Item-based 추천 함수
-def item_based_recommendation(book_title, book_title_sim):
-    book_title_index = pivot_data.columns.get_loc(book_title)
-    similar_books_index = np.argsort(book_title_sim[book_title_index])[-6:-1]
-    similar_books = list(pivot_data.columns[similar_books_index])
-    return similar_books
-
-# 앙상블 예측
 svd_preds = svd_model.test(testset)
-item_preds = [item_based_recommendation(book_title, book_title_sim) for book_title in pivot_data.columns]
+item_preds = item_based_recommendation(user_id, book_title_sim)
 ensemble_preds = [(0.7 * svd_pred.est) + (0.3 * item_pred) for svd_pred, item_pred in zip(svd_preds, item_preds)]
 
 # 사용자가 선택한 책과 유사한 책 5개 추천
@@ -322,3 +304,8 @@ if book_title in pivot_data.columns:
         st.write('Recommended books:')
         for book in recommended_books:
             st.write('- ' + book)
+    else:
+        st.write('No recommended books')
+else:
+    st.write('Enter a valid book title')
+
