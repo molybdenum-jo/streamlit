@@ -289,7 +289,7 @@ recommended_books = []
 for book in similar_books:
      _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
      if est >= 4.0:
-       recommended_books.append(book)
+        recommended_books.append(book)
  return recommended_books
 
 # Streamlit 앱 구성
