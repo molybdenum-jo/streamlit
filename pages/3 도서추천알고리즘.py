@@ -246,6 +246,11 @@ import numpy as np
 import tensorflow as tf
 import pickle
 
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+import pickle
+
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
 
@@ -300,4 +305,64 @@ js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
 
 st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
 
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split, GridSearchCV
+from tensorflow.keras.layers import Input, Dense, Embedding, Flatten, Dot
+from tensorflow.keras.models import Model
+from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
+
+def create_pivot_data():
+    # 데이터 불러오기
+    train = pd.read_csv('data/TRAIN.csv')
+
+    # 평점이 4점 이상인 데이터만 사용
+    train = train[train['Book-Rating'] >= 4]
+
+    # 사용자-아이템 행렬 생성
+    pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
+
+    return pivot_data
+
+def create_model(embedding_size=10, optimizer='adam'):
+    # 사용자-아이템 행렬 생성
+    pivot_data = create_pivot_data()
+
+    # 훈련 데이터와 테스트 데이터로 분리
+    train_data, test_data = train_test_split(pivot_data, test_size=0.2)
+
+    # 모델 구성
+    num_users, num_items = len(pivot_data), len(pivot_data.columns)
+    input_layer = Input(shape=(1,))
+    embedding_layer = Embedding(num_users, embedding_size)(input_layer)
+    flatten_layer = Flatten()(embedding_layer)
+    output_layer = Dense(num_items, activation='relu')(flatten_layer)
+    dot_layer = Dot(axes=1)([output_layer, embedding_layer])
+    model = Model(inputs=[input_layer], outputs=[dot_layer])
+    model.compile(loss='mse', optimizer=optimizer, metrics=['mae'])
+
+    return model
+
+    def grid_search():
+    # 모델 생성 함수를 KerasRegressor로 래핑
+    model = KerasRegressor(build_fn=create_model, verbose=0)
+
+    # 그리드서치를 수행할 하이퍼파라미터 값들
+    embedding_size = [10, 20, 30]
+    optimizer = ['adam', 'sgd']
+
+    # 그리드서치를 수행할 매개변수 그리드
+    param_grid = dict(embedding_size=embedding_size, optimizer=optimizer)
+
+    # 그리드서치 수행
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3, verbose=2)
+    grid_result = grid.fit(X=np.array(train_data.index), y=train_data.values)
+
+    # 최적의 하이퍼파라미터와 평가 지표 출력
+    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+    means = grid_result.cv_results_['mean_test_score']
+    stds = grid_result.cv_results_['std_test_score']
+    params = grid_result.cv_results_['params']
+    for mean, stdev, param in zip(means, stds, params):
+        print("%f (%f) with: %r" % (mean, stdev
 
