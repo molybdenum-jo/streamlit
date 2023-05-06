@@ -278,8 +278,16 @@ count_vect = CountVectorizer()
 book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
+# Item-based 추천 함수
+def item_based_recommendation(book_title, book_title_sim):
+    book_title_index = pivot_data.columns.get_loc(book_title)
+    similar_books_index = np.argsort(book_title_sim[book_title_index])[-6:-1]
+    similar_books = list(pivot_data.columns[similar_books_index])
+    return similar_books
+
+# 앙상블 예측
 svd_preds = svd_model.test(testset)
-item_preds = item_based_recommendation(user_id, book_title_sim)
+item_preds = [item_based_recommendation(book_title, book_title_sim) for book_title in pivot_data.columns]
 ensemble_preds = [(0.7 * svd_pred.est) + (0.3 * item_pred) for svd_pred, item_pred in zip(svd_preds, item_preds)]
 
 # 사용자가 선택한 책과 유사한 책 5개 추천
