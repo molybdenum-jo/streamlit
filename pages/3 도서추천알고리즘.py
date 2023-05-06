@@ -230,13 +230,6 @@ if book_title in pivot_data.columns:
 else:
     st.write('Enter a valid book title')
 
-js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
-
-st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
-js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
-
-st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
 
 
