@@ -238,7 +238,7 @@ js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
 st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
-  import pandas as pd
+import pandas as pd
 import numpy as np
 from surprise import Reader, Dataset, SVD
 from sklearn.metrics.pairwise import cosine_similarity
