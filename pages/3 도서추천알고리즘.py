@@ -254,13 +254,13 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
-# 데이터 나누기
-trainset, testset = train_test_split(train, test_size=0.2, random_state=42)
-
-# SVD 모델 구축
+# 훈련 데이터와 테스트 데이터로 분할
 reader = Reader(rating_scale=(1, 10))
 data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
 trainset = data.build_full_trainset()
+testset = trainset.build_testset()
+
+# SVD 모델 구축
 svd_model = SVD(n_factors=20, reg_all=0.02)
 svd_model.fit(trainset)
 
@@ -295,11 +295,8 @@ if book_title in pivot_data.columns:
     if len(recommended_books) > 0:
         st.write('Recommended books:')
         for book in recommended_books:
-            st.write('- ' + book)
-    else:
-        st.write('No recommended books')
-else:
-    st.write('Enter a valid book title')
+            st.write('- ' + book
+
 
 js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
 
