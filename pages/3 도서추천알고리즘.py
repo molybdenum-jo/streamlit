@@ -320,25 +320,8 @@ from surprise import SVD
 from sklearn.metrics.pairwise import cosine_similarity
 
 # 데이터 불러오기
-import numpy as np
-import pandas as pd
-
-train_df = pd.read_csv('data/TRAIN.csv')
-
-n_users = len(train_df['user_id'].unique())
-n_books = len(train_df['book_id'].unique())
-
-# ratings_matrix 초기화
-ratings_matrix = np.zeros((n_users, n_books))
-
-for row in train_df.itertuples():
-    user_idx = int(row[1]) - 1
-    book_idx = int(row[3])
-    rating = row[2]
-    ratings_matrix[user_idx, book_idx] = rating
-
-train = train[train['Book-Rating'].str.isnumeric()]  # 숫자로만 이루어진 Book-Rating만 선택
-train['Book-Rating'] = train['Book-Rating'].astype(int)  # Book-Rating 열을 정수형으로 변환
+train = pd.read_csv('data/TRAIN.csv')
+train['Book-Rating'] = train['Book-Rating'].astype(int) 
 
 # 평점이 4점 이상인 데이터만 사용
 train = train[train['Book-Rating'] >= 4]
@@ -354,7 +337,11 @@ num_users = len(train['User-ID'].unique())
 num_books = len(train['Book-ID'].unique())
 ratings_matrix = np.zeros((num_users, num_books))
 for row in train.itertuples():
-    ratings_matrix[int(row[1])-1, int(row[3])] = int(row[2])
+    rating = int(row[2])
+    user_idx = int(row[1].split('_')[1])-1
+    book_idx = row[3]
+    ratings_matrix[user_idx, book_idx] = rating
+
 
 
 # 딥러닝 모델 구축
