@@ -32,7 +32,7 @@ js = "window.scrollTo(0, document.getElementById('part-1-book').offsetTop);"
 
     
 st.markdown("<h3 id='part-1-book'>✅Part 1. 협업 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
+st.write('결과물: 사용자 기반 협업 필터링 및 아이템 기반 협업 필터링 모델을 구현하고, 이들 모델의 평점 예측 성능을 평가한다. RMSE 값으로 성능을 비교하여 어떤 협업 필터링 방법이 더 나은 성능을 보이는지 결정한다.')
 st.write("""
 ✔ 사용자기반 협업필터링
 """)
@@ -140,7 +140,7 @@ js = "window.scrollTo(0, document.getElementById('part-2-book').offsetTop);"
 
     
 st.markdown("<h3 id='part-2-book'>✅Part 2. 콘텐츠 기반 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
+st.write('결과물: 책의 속성(저자, 출판사, 장르 등)을 기반으로 한 콘텐츠 기반 필터링 모델을 구현하고, 모델의 평점 예측 성능을 평가한다. 협업 필터링 모델과 성능을 비교하여 콘텐츠 기반 필터링의 효과를 분석한다.')
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -185,7 +185,7 @@ else:
 js = "window.scrollTo(0, document.getElementById('part-3-book').offsetTop);"
 
 st.markdown("<h3 id='part-3-book'>✅Part 3. 행렬 인수분해  기반의 추천 시스템</h3>", unsafe_allow_html=True)
-
+st.write('결과물: SVD와 ALS와 같은 행렬 인수분해 기법을 사용하여 모델을 구현하고, 모델의 평점 예측 성능을 평가한다. 다른 추천 시스템과 성능을 비교하여 행렬 인수분해의 효과를 분석한다.')
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -240,7 +240,7 @@ js = "window.scrollTo(0, document.getElementById('part-4-book').offsetTop);"
 st.markdown("<h3 id='part-4-book'>✅Part 4. 딥 러닝 모델 기반의 추천 시스템</h3>", unsafe_allow_html=True)
 
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
-
+st.write('결과물: 딥 러닝 모델(신경망 기반 추천 모델 또는 잠재 요인 모델)을 구현하고, 모델의 평점 예측 성능을 평가한다. 다른 추천 시스템과 성능을 비교하여 딥 러닝 기반 추천 시스템의 효과를 분석한다.')
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -299,11 +299,12 @@ input_data = {'The Da Vinci Code':
 js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
+st.write('결과물: 여러 추천 시스템 모델을 결합하여 앙상블 모델을 구현한다. 가중 평균, 스태킹(Stacking) 등의 앙상블 기법을 적용하여 모델의 평점 예측 성능을 평가한다. 단일 모델과 성능을 비교하여 앙상블 기법의 효과를 분석한다.')
 
 js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
 
 st.markdown("<h3 id='part-6-book'>✅Part 6. 하이퍼마라미터 최적화를 통한 추천 시스템</h3>", unsafe_allow_html=True)
-
+st.write('결과물: 그리드 서치, 랜덤 서치, 베이지안 최적화 등의 기법을 사용하여 모델의 하이퍼파라미터를 최적화한다. 최적화된 하이퍼파라미터를 사용하여 모델의 성능을 평가하고, 기본 하이퍼파라미터를 사용한 모델과 성능을 비교하여 최적화 기법의 효과를 분석한다.')
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
