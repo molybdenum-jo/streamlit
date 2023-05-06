@@ -295,7 +295,7 @@ if book_title in pivot_data.columns:
     if len(recommended_books) > 0:
         st.write('Recommended books:')
         for book in recommended_books:
-            st.write('- ' + book
+            st.write('- ' + book)
 
 
 js = "window.scrollTo(0, document.getElementById('part-6-book').offsetTop);"
