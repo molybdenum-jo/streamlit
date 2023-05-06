@@ -121,6 +121,7 @@ def recommend_books(book_title):
             recommended_books.append(book)
     return recommended_books
 
+
 # Streamlit 앱 구성
 st.title('Book Recommender')
 book_title = st.text_input('Enter a book title', key='book_input')
