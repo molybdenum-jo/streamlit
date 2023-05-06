@@ -262,16 +262,26 @@ train = train[train['Book-Rating'] >= 4]
 # 사용자-아이템 행렬 생성
 pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
 
-# 훈련 데이터와 테스트 데이터로 분할
+# SVD 모델 구축
 reader = Reader(rating_scale=(1, 10))
 data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
 trainset = data.build_full_trainset()
-testset = trainset.build_testset()
+
 
 # SVD 모델 구축
 svd_model = SVD(n_factors=20, reg_all=0.02)
 svd_model.fit(trainset)
 
+# 아이템기반 모델 구축
+item_based_cf = KNNBasic(sim_options=sim_options)
+item_based_cf.fit(trainset)
+
+# 앙상블 예측 (가중 평균)
+ensemble_preds = []
+alpha = 0.999  # 가중치 설정 (0과 1 사이의 값을 선택)
+for i in range(len(svd_preds)):
+    ensemble_preds.append(alpha * svd_model[i] + (1 - alpha) * item_based_cf[i])
+    
 # Item-based 앙상블 모델 구축
 # 책 제목 기반으로 벡터화
 count_vect = CountVectorizer()
