@@ -303,4 +303,4 @@ if book_title in pivot_data.columns:
     if len(recommended_books) > 0:
         st.write('Recommended books:')
         for book in recommended_books:
-            st.write('- ' + book
+            st.write('- ' + book)
