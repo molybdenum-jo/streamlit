@@ -295,11 +295,12 @@ def recommend_books(book_title):
             recommended_books.append(book)
     return recommended_books
 
-# Streamlit 앱 구성
-import streamlit as st
+import random
+import string
 
+# Streamlit 앱 구성
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key='input')
+book_title = st.text_input('Enter a book title', key=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)))
 if book_title in pivot_data.columns:
     recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
