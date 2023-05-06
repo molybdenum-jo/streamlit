@@ -294,7 +294,7 @@ def recommend_books(book_title):
 import streamlit as st
 
 st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key=f"book_title_{i}")
+book_title = st.text_input('Enter a book title', key=f"book_title")
 if book_title in pivot_data.columns:
     recommended_books = recommend_books(book_title)
     if len(recommended_books) > 0:
