@@ -238,72 +238,7 @@ js = "window.scrollTo(0, document.getElementById('part-5-book').offsetTop);"
 
 st.markdown("<h3 id='part-5-book'>✅Part 5. 앙상블 기법을 사용한 추천 시스템</h3>", unsafe_allow_html=True)
 
-import pandas as pd
-import numpy as np
-from surprise import Reader, Dataset, SVD
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import CountVectorizer
 
-# 데이터 불러오기
-train = pd.read_csv('data/TRAIN.csv')
-
-# 사용자-아이템 행렬 생성
-pivot_data = train.pivot_table(index='User-ID', columns='Book-Title', values='Book-Rating', fill_value=0)
-
-# SVD 모델 구축
-reader = Reader(rating_scale=(1, 10))
-data = Dataset.load_from_df(train[['User-ID', 'Book-Title', 'Book-Rating']], reader)
-trainset = data.build_full_trainset()
-svd_model = SVD(n_factors=20, reg_all=0.02)
-svd_model.fit(trainset)
-
-# Item-based 앙상블 모델 구축
-# 책 제목 기반으로 벡터화
-count_vect = CountVectorizer()
-book_title_matrix = count_vect.fit_transform(train['Book-Title'])
-book_title_sim = cosine_similarity(book_title_matrix)
-
-# 모델 합치기
-def recommend_books(book_title):
-    book_rating = pivot_data[book_title]
-    
-    # SVD 모델
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], 
-                                                                     pivot_data.loc[:, [book_title]]))[-6:-1])
-    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
-    
-    # Item-based 모델
-    book_title_idx = count_vect.get_feature_names().index(book_title)
-    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
-    item_similar_books = list(train['Book-Title'][item_similar_books_index])
-    
-    # 두 모델 결과 합치기
-    similar_books = list(set(svd_similar_books + item_similar_books))
-    
-    recommended_books = []
-    for book in similar_books:
-        if book != book_title:
-            _, _, _, est, _ = svd_model.predict(uid=1, iid=book)
-            if est >= 4.0:
-                recommended_books.append(book)
-    return recommended_books
-
-import random
-import string
-
-# Streamlit 앱 구성
-st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)))
-if book_title in pivot_data.columns:
-    recommended_books = recommend_books(book_title)
-    if len(recommended_books) > 0:
-        st.write('Recommended books:')
-        for book in recommended_books:
-            st.write('- ' + book)
-    else:
-        st.write('No recommended books')
-else:
-    st.write('Enter a valid book title')
 
 
   
