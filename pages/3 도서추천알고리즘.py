@@ -281,26 +281,21 @@ book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
 # 모델 합치기
-def recommend_books(book_title):
-    # SVD 모델
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], 
-                                                                     pivot_data.loc[:, [book_title]]))[-6:-1])
-    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
-    
-    # Item-based 모델
-    book_title_idx = count_vect.get_feature_names().index(book_title)
-    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
+def recommend_books(book_title, svd_similar_books_index, item_similar_books_index):
+    book_rating = pivot_data[book_title]
+    svd_similar_books = list(pivot_data.columns
     item_similar_books = list(train['Book-Title'][item_similar_books_index])
-
-    # 사용자가 선택한 책과 유사한 책 5개 추천
-    similar_books = list(set(svd_similar_books + item_similar_books))
-    similar_books = [book for book in similar_books if book != book_title]
+    similar_books = svd_similar_books + item_similar_books
     recommended_books = []
     for book in similar_books:
         _, _, _, est, _ = svd_model.predict(uid=book_title, iid=book)
         if est >= 4.0:
             recommended_books.append(book)
     return recommended_books
+
+    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], pivot_data.loc[:, [book_title]]))[-6:-1])
+    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
+    recommended_books = recommend_books(book_title, svd_similar_books_index, item_similar_books_index)
 
 # Streamlit 앱 구성
 st.title('Book Recommender')
