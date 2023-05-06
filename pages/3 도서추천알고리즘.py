@@ -283,7 +283,7 @@ book_title_sim = cosine_similarity(book_title_matrix)
 # 모델 합치기
 def recommend_books(book_title, svd_similar_books_index, item_similar_books_index):
     book_rating = pivot_data[book_title]
-    svd_similar_books = list(pivot_data.columns
+    svd_similar_books = list(pivot_data.columns)
     item_similar_books = list(train['Book-Title'][item_similar_books_index])
     similar_books = svd_similar_books + item_similar_books
     recommended_books = []
