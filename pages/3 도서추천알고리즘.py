@@ -281,10 +281,12 @@ book_title_matrix = count_vect.fit_transform(train['Book-Title'])
 book_title_sim = cosine_similarity(book_title_matrix)
 
 # 모델 합치기
-def recommend_books(book_title, svd_similar_books_index, item_similar_books_index):
+def recommend_books(book_title, svd_similar_books_index, item_similar_books_index, count_vect, book_title_matrix):
     book_rating = pivot_data[book_title]
-    svd_similar_books = list(pivot_data.columns)
-    item_similar_books = list(train['Book-Title'][item_similar_books_index])
+    svd_similar_books = list(pivot_data.columns[svd_similar_books_index])
+    item_similar_books = []
+    for i in item_similar_books_index:
+        item_similar_books.append(count_vect.get_feature_names()[i])
     similar_books = svd_similar_books + item_similar_books
     recommended_books = []
     for book in similar_books:
@@ -293,15 +295,17 @@ def recommend_books(book_title, svd_similar_books_index, item_similar_books_inde
             recommended_books.append(book)
     return recommended_books
 
-    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], pivot_data.loc[:, [book_title]]))[-6:-1])
-    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
-    recommended_books = recommend_books(book_title, svd_similar_books_index, item_similar_books_index)
+book_title_idx = pivot_data.columns.get_loc(book_title)
+svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], pivot_data.loc[:, [book_title]]))[-6:-1])
+item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
+recommended_books = recommend_books(book_title, svd_similar_books_index, item_similar_books_index, count_vect, book_title_matrix)
 
 # Streamlit 앱 구성
-st.title('Book Recommender')
-book_title = st.text_input('Enter a book title', key=''.join(random.choices(string.ascii_uppercase + string.digits, k=6)))
 if book_title in pivot_data.columns:
-    recommended_books = recommend_books(book_title)
+    book_title_idx = pivot_data.columns.get_loc(book_title)
+    svd_similar_books_index = np.unique(np.argsort(cosine_similarity(pivot_data.loc[:, pivot_data.columns != book_title], pivot_data.loc[:, [book_title]]))[-6:-1])
+    item_similar_books_index = np.unique(np.argsort(book_title_sim[:, book_title_idx])[-6:-1])
+    recommended_books = recommend_books(book_title, svd_similar_books_index, item_similar_books_index, count_vect, book_title_matrix)
     if len(recommended_books) > 0:
         st.write('Recommended books:')
         for book in recommended_books:
@@ -310,4 +314,3 @@ if book_title in pivot_data.columns:
         st.write('No recommended books')
 else:
     st.write('Enter a valid book title')
-
