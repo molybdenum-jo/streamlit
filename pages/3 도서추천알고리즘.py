@@ -262,7 +262,7 @@ ratings_matrix = np.zeros((num_users, num_books))
 for row in train.itertuples():
     user_idx = int(row[1].split('_')[1]) - 1
     book_idx = row[3]
-    rating = row[2]
+    rating = int(row[2])
     ratings_matrix[user_idx, book_idx] = rating
 
 
