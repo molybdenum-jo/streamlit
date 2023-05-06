@@ -244,7 +244,7 @@ import streamlit as st
 
 # 데이터 불러오기
 train = pd.read_csv('data/TRAIN.csv')
-train['Book-Rating'] = train['Book-Rating'].astype(int) 
+train['Book-Rating'] = pd.to_numeric(train['Book-Rating'], errors='coerce').fillna(0).astype(int)
 
 # 평점이 4점 이상인 데이터만 사용
 train = train[train['Book-Rating'] >= 4]
