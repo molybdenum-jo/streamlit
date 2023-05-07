@@ -28,8 +28,8 @@ st.write('')
 
 st.write(""" 
 ## Model Test 결과
+- 가장 높은 점수를 받은 모델은 RMSE 점수 3.3974점인 SVD 와 아이템기반협업필터링 모델이다.
 """)
-st.write('가장 높은 점수를 받은 모델은 RMSE 점수 3.3974점인 SVD 와 아이템기반협업필터링 모델이.')
  
     
 st.markdown("<h3 id='part-1-book'>✅Part 1. 협업 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
