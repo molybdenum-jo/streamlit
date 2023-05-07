@@ -25,7 +25,13 @@ st.write("""
 """)
 st.write('')
 st.write('')
+st.write(""" 
+### Dataset
+""")
 
+df_train = pd.read_csv('data/TRAIN.csv')
+st.dataframe(df_train)
+st.write('')
 st.write(""" 
 ## Model Test 결과
 - 가장 높은 점수를 받은 모델은 RMSE 점수 3.3974점인 SVD 와 아이템기반협업필터링 모델이다.
