@@ -23,6 +23,10 @@ st.write('')
 st.write("""
 - 출판사나 도서 기업의 입장에서 도서 평점을 활용한 분석이다. 출판사/도서기업이 가지고 있는 고객 데이터와 평점 등을 통해 출판사/도서기업의 데이터가 고객의 평점에 어떠한 영향을 미치는지를 분석하여 고객의 선호도를 분석한다.
 """)
+st.write(""" 
+## Model Test 결과
+- 가장 높은 점수를 받은 모델은 RMSE 점수 3.3974점인 SVD 와 아이템기반협업필터링 모델이다.
+""")
 st.write('')
 st.write('')
 st.write(""" 
@@ -32,10 +36,7 @@ st.write("""
 df_train = pd.read_csv('data/TRAIN.csv')
 st.dataframe(df_train)
 st.write('')
-st.write(""" 
-## Model Test 결과
-- 가장 높은 점수를 받은 모델은 RMSE 점수 3.3974점인 SVD 와 아이템기반협업필터링 모델이다.
-""")
+st.write('-> Dataset Book-Title을 추천시스템에 직접 입력해보세요')
  
     
 st.markdown("<h3 id='part-1-book'>✅Part 1. 협업 필터링 기반의 추천 시스템</h3>", unsafe_allow_html=True)
